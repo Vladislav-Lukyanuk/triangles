@@ -1,0 +1,29 @@
+{
+  "name": "triangles",
+  "version": "0.0.1",
+  "description": "The triangles game powered by three js",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "webpack serve --mode development"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vladislav-Lukyanuk/triangles.git"
+  },
+  "author": "Vladislav Lukyanuk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vladislav-Lukyanuk/triangles/issues"
+  },
+  "homepage": "https://github.com/Vladislav-Lukyanuk/triangles#readme",
+  "dependencies": {
+    "three": "^0.133.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.132.2",
+    "html-webpack-plugin": "^5.3.2",
+    "ts-loader": "^9.2.6",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.3.0"
+  }
+}
