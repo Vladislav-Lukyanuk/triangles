@@ -1,19 +1,19 @@
-import {Camera, Euler} from "three";
+import {Camera, Euler, Quaternion} from "three";
 
 export class UserController {
     private readonly _camera: Camera;
     private readonly _domNode: Element;
     private readonly _euler: Euler;
-    private readonly _minPolarAngle = 0;
-    private readonly _maxPolarAngle = Math.PI;
+    private _isLocked: boolean;
+    private readonly _minPolarAngle = - Math.PI / 4;
+    private readonly _maxPolarAngle = Math.PI / 4;
 
     constructor(camera: Camera, domNode: Element) {
         this._camera = camera;
         this._domNode = domNode;
         this._euler = (new Euler()).reorder('XYZ');
-        debugger
+        this._isLocked = false;
 
-        this._lockPointer();
         this._connect();
     }
 
@@ -27,19 +27,31 @@ export class UserController {
     }
 
     private _lockPointer() {
+        if(this._isLocked) {
+            return;
+        }
+
         this._domNode.requestPointerLock();
+        this._isLocked = true;
     }
 
     private _unlockPointer() {
+        if(!this._isLocked) {
+            return;
+        }
+
         this._domNode.ownerDocument.exitPointerLock();
+        this._isLocked = true;
     }
 
     private _connect() {
-        this._domNode.addEventListener('mousemove', this._handleMouseMove);
+        this._domNode.addEventListener('mousemove', this._handleMouseMove.bind(this));
+        this._domNode.addEventListener('click', this._lockPointer.bind(this));
     }
 
     private _disconnect() {
-        this._domNode.removeEventListener('mousemove', this._handleMouseMove);
+        this._domNode.removeEventListener('mousemove', this._handleMouseMove.bind(this));
+        this._domNode.removeEventListener('click', this._lockPointer.bind(this));
     }
 
     private _handleMouseMove(event : MouseEvent) {
@@ -47,12 +59,14 @@ export class UserController {
         const movementY = event.movementY || 0;
 
         debugger
-        this._euler.setFromQuaternion(this._camera.quaternion);
-        this._euler.y -= movementX * 0.002;
-        this._euler.x -= movementY * 0.002;
+        let quaternion = new Quaternion().copy(this._camera.quaternion);
 
-        this._euler.x = Math.max( this._maxPolarAngle, Math.min( this._minPolarAngle, this._euler.x ) );
+        const turn = new Quaternion(movementY * 0.002, movementX * 0.002, 0);
+        quaternion.multiply(turn);
+        quaternion.normalize();
 
-        this._camera.quaternion.setFromEuler( this._euler );
+        quaternion.x = Math.min(this._maxPolarAngle, Math.max(this._minPolarAngle, quaternion.x));
+
+        this._camera.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
     }
 }
